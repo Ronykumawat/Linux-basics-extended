@@ -49,7 +49,14 @@ Use online platforms that provide Linux environments in your browser.
    - Get a Linux workspace in the browser.
 
 4. **Online IDEs like VS Code Web:**
-   - Some provide Linux terminals.
+   - Some provide Linux terminals.const (
+	PackageVar = types.PackageVar
+	LocalVar   = types.LocalVar
+	RecvVar    = types.RecvVar
+	ParamVar   = types.ParamVar
+	ResultVar  = types.ResultVar
+	FieldVar   = types.FieldVar
+)
 
 These are great for learning without installing anything locally.
 

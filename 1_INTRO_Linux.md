@@ -1,4 +1,5 @@
 # Linux-basics INTRO
+![Linux Mascot Tux](https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/200px-Tux.svg.png)
 Learn Linux basics with Molly  
 HI EVERYONE :)   
 I HAVE
@@ -9,10 +10,12 @@ This would be your personal cheat sheet!
 Topics to be
 covered:   
 LINUX BASICS   
+![Linux Terminal](https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400)
 WHAT IS FASTQ FORMAT   
 WHAT IS PHRED QUALITY   
 WHAT IS
 FASTQC AND IMPORTANCE OF QC ANALYSIS  
+![FastQC Logo](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_icon.png)
 DOWNLOAD ANACONDA/MAMBA/CONDA AND MAKE
 ENVIRNOMENT   
 HOW TO DOWNLOAD TOOLS FROM ANACONDA ETC.   
@@ -25,6 +28,7 @@ ADAPTER TRIMMING AND FILTRATION
 TRIM GALORE AND/OR FASTP (USED FOR ILLUMINA DATA)   
 GENOME ASSEMBLY TYPES
 (DENOVO/REFERENCE-BASED)  
+![DNA Assembly](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/DNA_Icon.svg/100px-DNA_Icon.svg.png)
 ASSEMBLY USING SPADES/MEGAHIT  
 ASSESSMENT USING QUAST 
 
