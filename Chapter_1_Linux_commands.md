@@ -1,139 +1,404 @@
-# Linux Basics Chapter 1!
+# Linux Basics: Essential Commands
+
 Hi everyone! 👋  
-Welcome to lesson 1️⃣ on Linux basic
-commands. You’ll learn how to navigate in Linux using the command line.
+Welcome to the comprehensive guide on Linux basic commands. This chapter covers all essential commands with detailed explanations, examples, and tips. Anyone can copy these commands and use them in their Linux environment.
 
+## Getting Started with Linux
 
-**Getting started  
-LINUX**   
-I’ll be using **Ubuntu 22-04 LTS** on my Windows
-desktop. You can also download previous versions of Ubuntu. The command lines and
-prompts will be usable on earlier and future versions as well.  
-Set up your
-username and use a simple password like your name or 1234. 
+I’ll be using **Ubuntu 22.04 LTS** on a Windows desktop via WSL. The commands work on most Linux distributions.
 
-**Structure**   
-After
-setting your username and password, you will see something like this on the
-screen: 
-<pre> molly_k@DESKTOP-MBJ059:~$ </pre>
+### Terminal Structure
+After logging in, you'll see a prompt like:
+```
+username@hostname:~$
+```
+- `username`: Your login name
+- `hostname`: Computer name
+- `~`: Home directory
+- `$`: Regular user prompt (# for root)
 
-You might see **$** or **#**
-depending on your system. Here “ **molly_k** ” is my username.   
-You need to be careful
-about being case-sensitive while working on Ubuntu.   
-A and a are not the same
-thing! ⚠️ So, keep this in mind while working. 
+**Important Notes:**
+- Linux is case-sensitive (A ≠ a)
+- Use Tab for auto-completion
+- Use ↑/↓ arrows for command history
 
-The `~` signifies that you're
-in your home directory, where all non-system files are stored. 
+## 1. Navigation Commands
 
-N.B. In UNIX,
-we call folders as directories.
+### pwd (Print Working Directory)
+Shows your current location in the file system.
+```
+pwd
+# Output: /home/username
+```
 
-**NAVIGATION**  
-How to navigate like a pro! 😄 
+### ls (List)
+Lists files and directories in current location.
+```
+ls                    # Basic list
+ls -l                 # Long format with details
+ls -a                 # Show hidden files (start with .)
+ls -h                 # Human-readable sizes
+ls -la                # Combine options
+```
 
-You need to know a few basic navigation commands to find your way while
-working. 
+### cd (Change Directory)
+Changes your current directory.
+```
+cd /path/to/directory    # Absolute path
+cd relative/path         # Relative path
+cd ..                    # Go up one level
+cd ~                     # Go to home directory
+cd -                     # Go to previous directory
+```
 
-**mkdir**     
-`mkdir` i.e. make directory is used to create a new
-directory.  
-You can choose any name for your directory. Here I’m using linux (directory
-name).   
-<pre>~$ mkdir linux </pre>
+### mkdir (Make Directory)
+Creates new directories.
+```
+mkdir newfolder              # Create single directory
+mkdir -p path/to/nested/dir  # Create nested directories
+```
 
-**ls**     
-`ls` is used to list down all
-the content present in your current. It gives you a list of sub-directories and
-files.  
-<pre>~$ ls
-linux </pre>
+## 2. File Operations
 
-**cd**     
-`cd` stands for change directory
-which literally means to change directory. When you have multiple directories,
-you can use `cd` to open other directories and navigate in and between them.  
+### touch
+Creates empty files or updates timestamps.
+```
+touch filename.txt           # Create empty file
+touch file1.txt file2.txt    # Create multiple files
+```
 
-<pre>~$ cd linux  
-~/linux$ </pre> 
+### cp (Copy)
+Copies files and directories.
+```
+cp source.txt destination.txt                    # Copy file
+cp -r source_dir destination_dir                 # Copy directory recursively
+cp -i source.txt destination.txt                 # Interactive (ask before overwrite)
+cp -v source.txt destination.txt                 # Verbose output
+```
 
-`cd linux` allows me to move into the linux
-direcotry. But what if I want to move back to my home directory?
+### mv (Move/Rename)
+Moves or renames files and directories.
+```
+mv oldname.txt newname.txt      # Rename file
+mv file.txt /path/to/directory/ # Move file
+mv -i source destination        # Interactive mode
+```
 
-**cd ..**   
+### rm (Remove)
+Deletes files and directories.
+```
+rm filename.txt                # Delete file
+rm -r directory/               # Delete directory recursively
+rm -i filename.txt             # Interactive deletion
+rm -f filename.txt             # Force deletion (no prompts)
+```
 
-I can go back to my home directory, using `cd ..` since it's a step behind me.  
+### rmdir (Remove Directory)
+Removes empty directories.
+```
+rmdir emptydir/                # Remove empty directory
+rmdir -p path/to/empty/dir     # Remove nested empty directories
+```
 
-<pre>~/linux$ cd ..  
-~$ </pre>
+## 3. File Permissions
 
-**pwd**    
-pwd (print working directory)
-prints the full path i.e. the full path of the directory you are currently in.
-Since, the name of the directory is linux the command line shows full address like
-below.   
-<pre>~/linux$ pwd  
-/home/molly_k/linux </pre>
+### chmod (Change Mode)
+Changes file permissions.
+```
+chmod 755 filename             # rwxr-xr-x
+chmod u+x filename             # Add execute for user
+chmod g-w filename             # Remove write for group
+chmod o=r filename             # Read only for others
+chmod -R 755 directory/        # Recursive
+```
 
-**nano**     
-Do you
-want to create and edit a text file? Use nano to create a text file.
-`nano` is a
-Linux-terminal-specific text editor.
-<pre>~$ nano mk.txt </pre>
+### chown (Change Owner)
+Changes file ownership.
+```
+chown username filename        # Change owner
+chown username:group filename  # Change owner and group
+chown -R user:group directory/ # Recursive
+```
 
-1. A new window
-will open.
-2. Type your text. (I typed My name is Molly)  And press Ctrl + O
-3.
-Type in the name of your file if you didn't provide it (only typed `nano`). But
-if you did, it'll already have a name (like it does in my case i.e. mk.txt).
-4.
-Press the Enter key to confirm your saving then text file with your desired
-name.
-5. Press Ctrl + X to exit the text editor and return to your
-directory.
+## 4. Text Processing
 
-**cat**     
-To see the text content of your text file you can use this command. 
+### cat (Concatenate)
+Displays file contents.
+```
+cat filename.txt               # Display file
+cat file1.txt file2.txt        # Concatenate multiple files
+cat -n filename.txt            # Show line numbers
+```
 
-<pre>~$ cat mk.txt  
-My name is Molly.  
-~$ </pre>
+### more/less
+Views large files page by page.
+```
+more filename.txt              # Page through file
+less filename.txt              # Better pager with search
+# In less: /search, n(next), q(quit)
+```
 
-**echo**  
-It prints out
-whatever you type on the terminal.  
-<pre>~$ echo “hi molly”   
-hi molly </pre>
+### head
+Shows first lines of a file.
+```
+head filename.txt              # First 10 lines
+head -n 20 filename.txt        # First 20 lines
+```
 
+### tail
+Shows last lines of a file.
+```
+tail filename.txt              # Last 10 lines
+tail -n 20 filename.txt        # Last 20 lines
+tail -f logfile.txt            # Follow file (real-time)
+```
 
-**grep**     
-If you want to search a particular word from the contents of a file
-you can use grep.   
-<pre>~$ grep “name” molly.txt   
-My *name* is Molly.
-</pre>
+### grep (Global Regular Expression Print)
+Searches for patterns in files.
+```
+grep "pattern" filename.txt    # Search for pattern
+grep -i "pattern" file.txt     # Case-insensitive
+grep -r "pattern" directory/   # Recursive search
+grep -n "pattern" file.txt     # Show line numbers
+```
 
-**rm**   
-To remove files, you can use this prompt.   
-⚠️ But be careful while
-using rm! ⚠️  
-<pre>~$ ls   
-linux   mk.txt  
-~$ rm mk.txt   
-~$
-</pre>
+### wc (Word Count)
+Counts lines, words, characters.
+```
+wc filename.txt                # Lines, words, characters
+wc -l filename.txt             # Only lines
+wc -w filename.txt             # Only words
+wc -c filename.txt             # Only characters
+```
 
-**rmdir**   
-rm alone is not enough to remove directories, you need to use rmdir which
-is to remove (empty) directories    
-⚠️ But be careful while using rmdir! ⚠️  
+### sort
+Sorts lines in a file.
+```
+sort filename.txt              # Sort alphabetically
+sort -n numbers.txt            # Numeric sort
+sort -r filename.txt           # Reverse sort
+sort -u filename.txt           # Unique (remove duplicates)
+```
 
-<pre>~$ rmdir linux  
-~$ </pre>
+### uniq
+Removes duplicate lines.
+```
+uniq filename.txt              # Remove consecutive duplicates
+uniq -c filename.txt           # Count occurrences
+uniq -d filename.txt           # Show only duplicates
+```
 
+## 5. System Information
 
-See you for the next lesson! 😄 👋
+### whoami
+Shows current username.
+```
+whoami
+# Output: username
+```
+
+### uname
+Shows system information.
+```
+uname                        # Kernel name
+uname -a                     # All information
+uname -r                     # Kernel release
+```
+
+### date
+Shows or sets system date/time.
+```
+date                         # Current date and time
+date +"%Y-%m-%d"             # Formatted date
+```
+
+### df (Disk Free)
+Shows disk space usage.
+```
+df                           # All filesystems
+df -h                        # Human-readable
+df -T                        # Include filesystem type
+```
+
+### du (Disk Usage)
+Shows directory/file sizes.
+```
+du                           # Directory sizes
+du -h                        # Human-readable
+du -s directory/             # Summary for directory
+```
+
+### free
+Shows memory usage.
+```
+free                         # Memory info
+free -h                      # Human-readable
+free -m                      # In megabytes
+```
+
+### top/htop
+Shows running processes.
+```
+top                          # Process monitor
+# Press q to quit, k to kill process
+```
+
+### ps (Process Status)
+Shows current processes.
+```
+ps                           # Current shell processes
+ps aux                       # All processes
+ps -ef                       # Full format
+```
+
+## 6. Networking
+
+### ping
+Tests network connectivity.
+```
+ping google.com              # Ping host
+ping -c 4 google.com         # Ping 4 times
+```
+
+### ifconfig/ip
+Shows network interface information.
+```
+ifconfig                     # Network interfaces (older)
+ip addr show                 # Show IP addresses (newer)
+ip route show                # Show routing table
+```
+
+### wget
+Downloads files from the web.
+```
+wget https://example.com/file.txt
+wget -O newname.txt https://example.com/file.txt  # Save as different name
+```
+
+### curl
+Transfers data from servers.
+```
+curl https://example.com     # Download webpage
+curl -O https://example.com/file.txt  # Save file
+curl -I https://example.com  # Show headers only
+```
+
+### ssh (Secure Shell)
+Connects to remote machines.
+```
+ssh username@hostname        # Connect to host
+ssh -p 2222 user@host        # Specify port
+```
+
+## 7. Package Management (Ubuntu/Debian)
+
+### apt
+Package manager for Debian-based systems.
+```
+sudo apt update              # Update package list
+sudo apt upgrade             # Upgrade packages
+sudo apt install package     # Install package
+sudo apt remove package      # Remove package
+sudo apt search keyword      # Search packages
+sudo apt show package        # Show package info
+```
+
+## 8. Other Useful Commands
+
+### history
+Shows command history.
+```
+history                      # Show all commands
+history 10                   # Show last 10 commands
+!123                         # Execute command number 123
+!!                           # Execute last command
+```
+
+### alias
+Creates command shortcuts.
+```
+alias ll='ls -la'            # Create alias
+alias                        # Show all aliases
+unalias ll                   # Remove alias
+```
+
+### export
+Sets environment variables.
+```
+export PATH=$PATH:/new/path  # Add to PATH
+export EDITOR=nano           # Set default editor
+echo $PATH                   # Show variable
+```
+
+### man (Manual)
+Shows command documentation.
+```
+man ls                       # Manual for ls command
+man -k keyword               # Search manuals
+```
+
+### which
+Shows location of commands.
+```
+which ls                     # Path to ls command
+```
+
+### find
+Searches for files.
+```
+find . -name "*.txt"         # Find .txt files in current dir
+find /home -type f -size +1M # Find files >1MB in /home
+```
+
+### tar
+Archives files.
+```
+tar -cvf archive.tar files/   # Create archive
+tar -xvf archive.tar         # Extract archive
+tar -czvf archive.tar.gz files/  # Create compressed
+tar -xzvf archive.tar.gz     # Extract compressed
+```
+
+### zip/unzip
+Works with ZIP files.
+```
+zip archive.zip file1 file2  # Create ZIP
+unzip archive.zip            # Extract ZIP
+```
+
+## Tips for Using Commands
+
+1. **Combine Commands**: Use pipes (|)
+   ```
+   ls | grep txt              # List files containing "txt"
+   ps aux | grep firefox      # Find Firefox process
+   ```
+
+2. **Redirect Output**:
+   ```
+   command > file.txt         # Redirect stdout to file
+   command >> file.txt        # Append to file
+   command 2> error.log       # Redirect stderr
+   command > output.txt 2>&1  # Redirect both
+   ```
+
+3. **Background Jobs**:
+   ```
+   command &                   # Run in background
+   jobs                        # Show background jobs
+   fg %1                       # Bring job 1 to foreground
+   bg %1                       # Resume job 1 in background
+   ```
+
+4. **Command Substitution**:
+   ```
+   echo "Today is $(date)"     # Insert command output
+   ```
+
+5. **Wildcards**:
+   ```
+   ls *.txt                    # All .txt files
+   ls file[1-3].txt            # file1.txt, file2.txt, file3.txt
+   ```
+
+Remember to practice these commands in a safe environment. Use `man command` for detailed help on any command. Happy learning! 😄 👋
