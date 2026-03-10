@@ -1,4 +1,5 @@
 # Linux Basics: Essential Commands
+![Linux Terminal](https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400)
 
 Hi everyone! 👋  
 Welcome to the comprehensive guide on Linux basic commands. This chapter covers all essential commands with detailed explanations, examples, and tips. Anyone can copy these commands and use them in their Linux environment.

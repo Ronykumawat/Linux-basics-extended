@@ -1,4 +1,5 @@
 # Linux Basics Extended
+![Linux Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/200px-Tux.svg.png)
 
 Learn Linux basics with Molly, extended with installation guides for Windows users.
 

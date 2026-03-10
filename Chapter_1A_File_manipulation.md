@@ -1,4 +1,5 @@
 # Linux Basics - Chapter 1A
+![File Folder Icon](https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Folder_icon.svg/100px-Folder_icon.svg.png)
 
 In this module, we'll be learning about some basic
 file manipulation in terminal. 90%+ of a Bioinformaticians work is performed in

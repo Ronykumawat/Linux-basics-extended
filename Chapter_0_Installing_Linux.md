@@ -1,4 +1,5 @@
 # Chapter 0: Installing Linux on Windows
+![Ubuntu Logo](https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png)
 
 This chapter covers different ways to install and run Linux on a Windows system.
 
