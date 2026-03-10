@@ -1,9 +1,14 @@
-# Chapter 5: Genome Annotation
-![Gene Icon](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Gene_icon.svg/100px-Gene_icon.svg.png)
+# 🔬 Chapter 5: Genome Annotation
+
+![Genomics](https://img.shields.io/badge/Genomics-Gene%20Annotation-green?style=for-the-badge&logo=rss&logoColor=white)
 
 Annotation identifies and labels genes and functional regions in genome sequences.
 
-## What is Annotation?
+> 🏃 **Goal:** Transform raw sequences into annotated, functional genomes!
+
+---
+
+## 📖 What is Annotation?
 
 Annotation involves:
 - **Gene Prediction**: Finding open reading frames (ORFs)
@@ -11,7 +16,9 @@ Annotation involves:
 - **Feature Detection**: Identifying promoters, tRNA, rRNA
 - **Quality Assessment**: Validating predictions
 
-## Tool: Prokka (Best for Bacteria)
+---
+
+## 🛠️ Tool: Prokka (Best for Bacteria)
 
 Prokka is the fastest and most reliable prokaryotic genome annotator.
 
@@ -82,7 +89,9 @@ TOT=$(grep -c "CDS" prokka.gff)
 echo "scale=2; $HYP * 100 / $TOT" | bc
 ```
 
-## Tool: AMRFinder (Antimicrobial Resistance)
+---
+
+## 🦠 Tool: AMRFinder (Antimicrobial Resistance)
 
 Identify antimicrobial resistance genes.
 
@@ -163,4 +172,12 @@ Expected values:
 - Ignore hypothetical proteins
 - Skip manual validation
 
-You're ready to annotate genomes!
+---
+
+## 🎓 Congratulations!
+
+✅ You now have essential genome annotation skills!
+
+**Next Step:** Move to Chapter 6 to analyze metagenomics!
+
+**Happy learning! You're becoming an expert! 🚀🧬**
