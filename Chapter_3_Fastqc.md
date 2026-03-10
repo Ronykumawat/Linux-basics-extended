@@ -1,93 +1,197 @@
-# Chapter 3: FastQC - Quality Control Analysis
-![FastQC Logo](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_icon.png)
+# 🔍 Chapter 3: FastQC - Quality Control Analysis
 
-FastQC analyzes raw sequencing data to identify quality issues before downstream analysis.
+> **Understand your sequencing data before analysis!**
 
-## What is FastQC?
+---
 
-Identifies potential problems in FASTQ files:
-- Low-quality bases at sequence ends
-- Adapter contamination
-- Sequence biases
-- GC content anomalies
-- High duplication levels
+## 📊 What is FastQC?
 
-## Installation
+FastQC analyzes raw sequencing data (FASTQ files) to identify potential quality issues:
+
+| Issue | Impact | Severity |
+|-------|--------|----------|
+| 🔴 Low-quality bases | Assembly errors | High |
+| 🟡 Adapter contamination | False sequences | Medium |
+| 🟡 Sequence biases | Assembly bias | Medium |
+| 🟢 GC anomalies | May be biological | Low |
+| 🟢 High duplication | PCR artifacts | Low |
+
+---
+
+## 🚀 Installation
 
 ```bash
+# Using Mamba (recommended)
 mamba create -n qc -c bioconda fastqc
 mamba activate qc
+
+# Verify
 fastqc --version
 ```
 
-## Basic Usage
+---
 
+## 💻 Basic Usage
+
+### Single File
 ```bash
-# Analyze single file
 fastqc sample.fastq
+```
 
-# Multiple files
+### Multiple Files
+```bash
 fastqc *.fastq
+```
 
-# Specify output directory
+### With Output Directory
+```bash
 fastqc -o results/ sample.fastq
+```
 
-# With threading (faster)
+### Parallel Processing (4 threads)
+```bash
 fastqc -t 4 -o results/ *.fastq
+```
 
-# Quiet mode for batch processing
+### Quiet Mode (for scripts)
+```bash
 fastqc --quiet -o results/ *.fastq
 ```
 
-## Report Contents
+---
 
-| Module | What It Shows |
-|--------|---------------|
-| Per Base Quality | Phred score at each position (Green=Good, Red=Bad) |
-| Sequence Quality | Overall quality score distribution |
-| Per Base Content | A/C/G/T distribution at each position |
-| Adapter Content | Detects leftover sequencing adapters |
-| GC Content | Overall GC percentage |
-| N Content | Uncalled bases (N's) percentage |
-| Duplication | Sequence duplication levels |
+## 📈 Understanding Reports
 
-## Interpreting Results
+### Report Modules
+
+| Module | What It Measures | Pass Criteria |
+|--------|------------------|---------------|
+| **Per Base Quality** | Phred score at each position | Q > 28 across genome |
+| **Per Sequence Quality** | Overall read quality | Peak at Q > 30 |
+| **Per Base Content** | A/C/G/T distribution | Even distribution |
+| **Adapter Content** | Leftover adapters | < 5% |
+| **GC Content** | % of G+C bases | Matches expected |
+| **N Content** | Uncalled bases (N) | < 0.1% |
+| **Duplication Levels** | Repeated sequences | < 50% |
+
+### Traffic Light System
+
+🟢 **PASS** - Good quality, no action needed  
+🟡 **WARN** - Possible issue, may need attention  
+🔴 **FAIL** - Likely problem, investigate  
+
+---
+
+## 📖 Viewing Reports
 
 ```bash
-# View HTML report
+# HTML reports generated automatically
 open sample_fastqc.html        # macOS
 xdg-open sample_fastqc.html    # Linux
 firefox sample_fastqc.html     # Alternative
 ```
 
-Quality scoring:
-- **Green (PASS)**: Good quality
-- **Orange (WARN)**: May need attention
-- **Red (FAIL)**: Potential problems
+---
 
-## Batch Processing
+## 🔄 Batch Processing
 
+### Process All Files
 ```bash
-# Process all files with reports
 for file in *.fastq; do
+  echo "Processing: $file"
   fastqc -o results/ "$file"
 done
-
-# Extract summary
-grep ">>.*pass" results/*/summary.txt | wc -l
 ```
 
-## Next Steps
-
-If quality is poor:
+### Count Results
 ```bash
-# Install trimming tool
-mamba create -n trim -c bioconda fastp
+# How many files passed QC?
+grep ">>.*PASS" results/*/summary.txt | wc -l
 
-# Trim low-quality sequences
+# Which files failed?
+grep FAIL results/*/summary.txt
+```
+
+---
+
+## ⚠️ Common Issues & Solutions
+
+### ❌ Low Quality at 3' End
+**Cause:** Sequencing degradation  
+**Solution:** Trim 3' ends
+```bash
+fastp -i input.fastq -o output.fastq --length_required 50
+```
+
+### ❌ High Adapter Content
+**Cause:** Incomplete adapter removal  
+**Solution:** Re-trim with adapters
+```bash
+trim_galore --adapter AGATCGGAAGAGC input.fastq
+```
+
+### ❌ High N Content
+**Cause:** Sequencing errors  
+**Solution:** Filter low-quality reads
+```bash
+fastp -i input.fastq -o output.fastq -q 20
+```
+
+### ✅ GC Bias (FAIL)
+**Note:** May be biological! Don't always trim  
+**Action:** Document and proceed carefully
+
+---
+
+## 🔧 Advanced Options
+
+```bash
+# Extract results only (no HTML)
+fastqc --noextract sample.fastq
+
+# Specific format
+fastqc --format bam input.bam
+
+# No group bases by position (fine resolution)
+fastqc --nogroup sample.fastq
+```
+
+---
+
+## 📋 Quality Control Checklist
+
+- [ ] Run FastQC on raw data
+- [ ] Check all reports
+- [ ] Identify problem samples
+- [ ] Decide: trim or filter?
+- [ ] Re-run FastQC after trimming
+- [ ] Verify improvements
+- [ ] Document decisions
+
+---
+
+## 🎯 Next Steps
+
+If quality is **POOR**:
+```bash
+mamba create -n trim -c bioconda fastp
 fastp -i sample.fastq -o trimmed.fastq -q 20 -l 50
 ```
 
-After trimming, re-run FastQC to verify improvements!
+If quality is **GOOD**:
+```bash
+# Proceed to assembly!
+cd ../Chapter_4_Trimming_and_assembly.md
+```
 
-You're ready to assess sequencing quality!
+---
+
+## 📚 Resources
+
+- [FastQC Official](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [Phred Quality Scores](https://en.wikipedia.org/wiki/Phred_quality_score)
+- [NGS Best Practices](https://www.illumina.com/)
+
+---
+
+**Ready to QC your data? Let's assess! 📊**
