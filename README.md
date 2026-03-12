@@ -1,107 +1,92 @@
-# 🧬 Linux Basics Extended - JNLAB Training
+# Linux Basics Extended - JNLAB Training
 
-> **Complete Bioinformatics Training from Linux Basics to Metagenomics**
-
----
-
-## 🎯 Overview
-
-This is a comprehensive training course covering:
-- **Linux Fundamentals** for bioinformaticians
-- **Sequencing data analysis pipeline**
-- **Genome assembly and annotation**
-- **Metagenomics and community analysis**
-
-Perfect for beginners and intermediate learners! 🚀
+A complete bioinformatics training course covering everything from Linux basics to metagenomics analysis.
 
 ---
 
-## 📚 Course Contents
+## About This Course
 
-### Prerequisites
-- [Installing Linux on Windows](Chapter_0_Installing_Linux.md) - WSL, Online platforms, and more
+This is a comprehensive guide I put together for learning bioinformatics. It starts with basic Linux commands and goes all the way through advanced topics like genome assembly and metagenomics.
 
-### Core Chapters
-1. **[Introduction](1_INTRO_Linux.md)** - Course overview and topics
-2. **[Linux Commands](Chapter_1_Linux_commands.md)** - Essential terminal commands
-3. **[File Manipulation](Chapter_1A_File_manipulation.md)** - Working with files and data
-4. **[Mamba Installation](Chapter_2_Installing_mamba.md)** - Package manager setup
-5. **[Quality Control (FastQC)](Chapter_3_Fastqc.md)** - Analyze sequencing quality
-6. **[Trimming & Assembly](Chapter_4_Trimming_and_assembly.md)** - Data preprocessing and genome assembly
-7. **[Genome Annotation](Chapter_5_Annotation.md)** - Gene prediction and functional annotation
-8. **[Metagenomics](Chapter_6_Classification_Visualization_Assembly.md)** - Community analysis with Kraken2 & visualization
+Whether you're just getting started with bioinformatics or looking to brush up on your skills, this course has you covered.
 
 ---
 
-## 🚀 Quick Start
+## What's Inside
+
+### Getting Started
+- [Installing Linux on Windows](Chapter_0_Installing_Linux.md) - Multiple ways to get Linux running
+- [Course Introduction](1_INTRO_Linux.md) - Overview of what we'll cover
+
+### Core Content
+1. [Linux Commands](Chapter_1_Linux_commands.md) - Essential terminal commands
+2. [File Manipulation](Chapter_1A_File_manipulation.md) - Working with data files
+3. [Installing Mamba](Chapter_2_Installing_mamba.md) - Setting up your environment
+4. [Quality Control with FastQC](Chapter_3_Fastqc.md) - Checking data quality
+5. [Trimming and Assembly](Chapter_4_Trimming_and_assembly.md) - Processing sequencing data
+6. [Genome Annotation](Chapter_5_Annotation.md) - Finding genes and functions
+7. [Metagenomics](Chapter_6_Classification_Visualization_Assembly.md) - Analyzing microbial communities
+
+---
+
+## Quick Start
 
 ```bash
-# Clone the repository
+# Get the course materials
 git clone https://github.com/Ronykumawat/Linux-basics-extended.git
 cd Linux-basics-extended
 
-# Read the introduction
+# Start with the introduction
 cat 1_INTRO_Linux.md
-
-# Start with Chapter 0 if you need to install Linux
-# Otherwise, begin with Chapter 1!
 ```
 
 ---
 
-## 💡 Key Features
+## What Makes This Different
 
-✅ **Hands-on examples** - Copy-paste ready commands  
-✅ **Complete pipelines** - Full bioinformatics workflows  
-✅ **Troubleshooting** - Solutions for common problems  
-✅ **Best practices** - Industry standards and tips  
-✅ **Detailed explanations** - Understand every step  
-
----
-
-## 🛠️ Tools Covered
-
-| Category | Tools |
-|----------|-------|
-| **Environment** | Mamba, Conda, Anaconda |
-| **Quality Control** | FastQC, fastp, Trim Galore |
-| **Assembly** | SPAdes, MEGAHIT, QUAST |
-| **Annotation** | Prokka, AMRFinder |
-| **Metagenomics** | Kraken2, Krona, MetaBAT2 |
+- **Practical examples** - Real commands you can actually run
+- **Complete workflows** - Full pipelines from start to finish
+- **Troubleshooting tips** - Solutions to common problems
+- **Step-by-step explanations** - No skipping steps
 
 ---
 
-## 📖 How to Use
+## Tools You'll Learn
 
-1. **Read sequentially** - Start with Chapter 0 or 1
-2. **Practice commands** - Type them out, don't just copy
-3. **Explore variations** - Try different parameters
-4. **Ask questions** - Don't hesitate to revisit concepts
-
----
-
-## 🎓 Learning Path
-
-```
-Beginner → Linux Basics → Quality Control → Assembly → Annotation → Metagenomics → Advanced
-```
+- **Environment management**: Mamba, Conda
+- **Quality control**: FastQC, fastp
+- **Assembly**: SPAdes, MEGAHIT, QUAST
+- **Annotation**: Prokka, AMRFinder
+- **Metagenomics**: Kraken2, Krona, MetaBAT2
 
 ---
 
-## 📞 Support
+## How to Use This Course
 
-Have questions? See something unclear?
-- Create an issue on GitHub
-- Check the troubleshooting sections
-- Review example commands carefully
-
----
-
-## 📄 License
-
-CC0-1.0 - Free to use and modify
+1. Read through the chapters in order
+2. Try the commands as you go
+3. Don't just copy-paste - type them out
+4. Experiment with different options
+5. Come back to sections when you need them
 
 ---
 
+## Questions?
 
-*Last Updated: March 2026*
+If something doesn't make sense or you run into problems:
+- Check the troubleshooting sections in each chapter
+- Look at the examples again
+- Try searching online for the specific error
+- Ask questions - learning is about figuring things out
+
+---
+
+## License
+
+Feel free to use this however you want. Share it with others who might find it helpful.
+
+---
+
+*Created by Rony Kumawat for JNLAB training*
+
+*Updated: March 2026*
