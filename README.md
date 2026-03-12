@@ -103,6 +103,5 @@ CC0-1.0 - Free to use and modify
 
 ---
 
-**Made with ❤️ for JNLAB by Rony Kumawat**
 
 *Last Updated: March 2026*
