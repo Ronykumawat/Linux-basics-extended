@@ -6,7 +6,7 @@ This course covers the fundamentals of Linux and bioinformatics analysis. We'll 
 
 ## Welcome
 
-I've put together these lessons to help you learn Linux and bioinformatics step by step. Whether you're new to this or just need a refresher, you'll find practical examples and clear explanations here.
+We put together these lessons to help you learn Linux and bioinformatics step by step. Whether you're new to this or just need a refresher, you'll find practical examples and clear explanations here.
 
 ---
 
