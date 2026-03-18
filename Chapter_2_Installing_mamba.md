@@ -22,19 +22,14 @@
 ### Step 1: Download Mambaforge
 ```bash
 # Linux/Mac
-wget https://github.com/conda-forge/mambaforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+wget https://github.com/conda-forge/miniforge/releases/download/25.3.1-0/Miniforge3-25.3.1-0-Linux-x86_64.sh 
 
-# macOS Intel
-# wget https://github.com/conda-forge/mambaforge/releases/latest/download/Mambaforge-MacOSX-x86_64.sh
 
-# macOS Apple Silicon
-# wget https://github.com/conda-forge/mambaforge/releases/latest/download/Mambaforge-MacOSX-arm64.sh
-```
 
 ### Step 2: Run Installer
 ```bash
-chmod +x Mambaforge-Linux-x86_64.sh
-./Mambaforge-Linux-x86_64.sh
+chmod +x Miniforge3-25.3.1-0-Linux-x86_64.sh 
+./Miniforge3-25.3.1-0-Linux-x86_64.sh 
 ```
 
 During installation:
