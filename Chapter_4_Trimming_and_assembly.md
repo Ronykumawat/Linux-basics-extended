@@ -78,7 +78,7 @@ Parameters:
 - `-m 64`: Use 64GB memory
 - `--careful`: Extra quality checks
 
-### 🚀 MEGAHIT (Large Genomes/Metagenomes)
+### 🚀 MEGAHIT 
 
 ```bash
 mamba create -n megahit -c bioconda megahit
