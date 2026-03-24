@@ -24,11 +24,6 @@ Assembly Quality
         Contiguity ──── QUAST  (how fragmented is it?)
         Completeness ── BUSCO  (are expected genes present?)
 ```
-```
-## Activate conda environment
-conda activate work
- 
-```
 
 ---
 
@@ -37,7 +32,6 @@ conda activate work
 | File | Format | Description | From | Download command |
 |------|--------|-------------|------|------------------|
 | `contigs.fasta` | FASTA | Assembled genome | Download or Provided |```wget https://raw.githubusercontent.com/mukulverma22/ICMR_genome_assembly-/refs/heads/main/day2-genome-assembly/contigs.fasta``` |
-| `MTB.fna` | FASTA | Reference genome (optional but recommended) | Download or provided | ```wget https://raw.githubusercontent.com/mukulverma22/ICMR_genome_assembly-/refs/heads/main/day2-genome-assembly/MTB.fna``` |
 | BUSCO lineage | Auto-downloaded | Gene database for completeness check | BUSCO downloads automatically |
 
 
@@ -216,180 +210,6 @@ busco_results/
     └── busco.log
 ```
 
-### Visualize BUSCO Results
-```
-## Download the required script:
-cd busco_results/
-wget https://raw.githubusercontent.com/mukulverma22/ICMR_genome_assembly-/refs/heads/main/day2-genome-assembly/Busco_plot.py
-
-```
-
-```bash
-
-# Generate a summary plot (requires matplotlib)
- python Busco_plot.py short_summary.specific.bacteria_odb10.busco_results.txt
-
-```
-
----
-
-## 🔧 Tool 3: RagTag
-
-### What is RagTag?
-**RagTag** performs **contig scaffolding** — it uses a reference genome to order, orient, and join your contigs into longer scaffolds (chromosome-level assemblies).
-
-Think of it like: You've assembled puzzle pieces (contigs), but they're all randomly scattered. RagTag uses a "solved puzzle picture" (reference genome) to figure out where each piece goes.
-
-```
-Before RagTag (unordered contigs):
-[Contig_5]  [Contig_1]  [Contig_8]  [Contig_3]  [Contig_2]
-
-After RagTag (ordered scaffolds based on reference):
-[Contig_1]----[Contig_3]--------[Contig_5]
-                     ↑ gaps filled with Ns
-```
-
-### RagTag Modules
-
-| Module | What it does |
-|--------|--------------|
-| `scaffold` | Orders/orients contigs using a reference |
-| `patch` | Fills gaps in an assembly using another assembly |
-| `merge` | Merges two assemblies |
-| `correct` | Corrects misassemblies using a reference |
-
-### Install RagTag
-```bash
-cd ..
-# Verify
-ragtag.py --version
-```
-
-### Run RagTag Scaffold
-
-```bash
-mkdir -p ragtag
-
-ragtag.py scaffold \
-    MTB.fna \
-    contigs.fasta \
-    -o ragtag \
-    -t 2 \
-```
-    
-```
-# Flag explanations:
-# scaffold          : Module to use
-# reference.fasta   : Reference genome to scaffold against
-# assembly.fasta    : Your query assembly (from SPAdes)
-# -o                : Output directory
-# -t                : CPU threads
-# -u                : Add unplaced contigs to output (don't discard them)
-```
-
-### RagTag Output Files
-
-```
-results/ragtag/
-├── ragtag.scaffold.fasta       ← ✅ Scaffolded assembly
-├── ragtag.scaffold.stats       ← Scaffolding statistics
-├── ragtag.scaffold.agp         ← Assembly coordinates (AGP format)
-└── ragtag.scaffold.confidence.txt ← Confidence scores per scaffold
-```
-
-### Reading RagTag Stats
-
-```bash
-cat ragtag/ragtag.scaffold.stats
-```
-
-```
-# Example output:
-placed_sequences = 245         ← Contigs successfully placed
-unplaced_sequences = 12        ← Contigs couldn't be placed (might be contamination or novel)
-gap_between_placed_seqs = 89   ← Number of gaps (Ns) inserted
-```
-
-### Re-run QUAST on Scaffolded Assembly
-
-After RagTag, compare the scaffolded assembly to your original:
-
-```bash
-quast.py \
-    ragtag/ragtag.scaffold.fasta \
-    contigs.fasta \
-    --output-dir quast_comparison \
-    --threads 2
-```
-```
-# This runs QUAST on BOTH assemblies simultaneously for comparison!
-```
-
----
-
-## 📊 Complete Assessment Workflow Summary
-
-```bash
-# Quick one-liner to run everything in sequence
-# (run from sessions/session-2B-ii/ directory)
-
-# 1. QUAST
-quast.py assembly.fasta -o results/quast -t 2
-
-# 2. BUSCO
-busco --in assembly.fasta --out busco_results \
-      --mode genome --lineage_dataset bacteria_odb10 --cpu 2
-
-# 3. RagTag scaffolding
-ragtag.py scaffold reference.fasta assembly.fasta -o results/ragtag -t 2 -u
-
-```
-
----
-
-## 📊 Interpreting Your Final Results
-
-### Assembly Quality Scorecard
-
-| Metric | Tool | Poor | Acceptable | Good | Excellent |
-|--------|------|------|-----------|------|-----------|
-| N50 | QUAST | <10 kb | 10-100 kb | 100 kb-1 Mb | >1 Mb |
-| Genome fraction | QUAST | <80% | 80-90% | 90-98% | >98% |
-| Misassemblies | QUAST | >100 | 10-100 | 1-10 | 0 |
-| BUSCO complete | BUSCO | <50% | 50-80% | 80-95% | >95% |
-| Contigs placed | RagTag | <50% | 50-80% | 80-95% | >95% |
-
----
-
-## 📊 Expected Final Output Structure
-
-```
-results/
-├── quast/
-│   ├── report.html             ← ✅ Assembly contiguity report
-│   └── report.txt
-├── busco_results/
-│       └── short_summary*.txt  ← ✅ Completeness summary
-├── ragtag/
-│   └── ragtag.scaffold.fasta   ← ✅ Improved scaffolded assembly
-└── quast_scaffolded/
-    └── report.html             ← ✅ Comparison: before vs after scaffolding
-```
-
----
-
-## 🚨 Common Errors & Fixes
-
-| Error | Likely Cause | Fix |
-|-------|--------------|-----|
-| QUAST: `No contigs > min length` | Assembly is very fragmented | Lower `--min-contig` to 200 |
-| BUSCO: Database not found | First run, downloading | Wait for download; check internet |
-| BUSCO: Very low completeness for virus | Viral genomes not in BUSCO | This is expected; use QUAST genome fraction instead |
-| RagTag: `No valid alignments` | Query and reference too different | Check you're using the right reference species |
-| RagTag: All contigs unplaced | Reference genome mismatch | Verify reference is the same organism |
-
----
-
 ---
 
 ## 🎉 Congratulations!
@@ -404,8 +224,7 @@ Clean Reads
 Draft Assembly
     ↓ QUAST → BUSCO
 Assembly Assessment
-    ↓ RagTag
-Scaffolded Genome Assembly ✅
+
 ```
 
 ---
