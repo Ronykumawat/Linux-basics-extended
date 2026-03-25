@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SNP & Variant Calling Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,600;1,400&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070c12;
+    --surface: #0d1520;
+    --surface2: #111d2e;
+    --border: #1e3050;
+    --accent: #00e5ff;
+    --accent2: #39ff6e;
+    --accent3: #ff6b6b;
+    --accent4: #f7c948;
+    --text: #cdd9e8;
+    --text-muted: #6b8aaa;
+    --text-dim: #3a5270;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* DNA strand animation top bar */
+  .dna-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent), #a78bfa, var(--accent3), var(--accent2));
+    background-size: 300% 100%;
+    animation: dnaFlow 4s linear infinite;
+  }
+  @keyframes dnaFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  /* Hero */
+  .hero {
+    padding: 80px 60px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse at center, rgba(0,229,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.07);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 5vw, 58px);
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 580px;
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    max-width: 700px;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 20px 24px;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent2);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* Main layout */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 60px 80px;
+  }
+
+  /* Section headers */
+  .section-header {
+    margin: 56px 0 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-header h2 {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* Pipeline overview */
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .pipeline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .pipeline-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    transform: translateY(-2px);
+  }
+
+  .pipeline-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0.6;
+  }
+
+  .card-step {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .card-tool {
+    margin-top: 12px;
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  /* Step blocks */
+  .step-block {
+    margin-bottom: 36px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .step-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .step-info p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .step-body {
+    padding: 24px;
+  }
+
+  .step-body p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+
+  .step-body p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: #050a10;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .code-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #080f18;
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 6px;
+  }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot1 { background: #ff5f57; }
+  .dot2 { background: #febc2e; }
+  .dot3 { background: #28c840; }
+
+  .code-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .code-body {
+    padding: 18px 20px;
+    overflow-x: auto;
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre;
+  }
+
+  .kw { color: #79b8ff; }
+  .cmd { color: var(--accent2); }
+  .flag { color: #ffab70; }
+  .path { color: var(--accent); }
+  .comment { color: var(--text-dim); font-style: italic; }
+  .pipe-sym { color: #a78bfa; }
+
+  /* Tips */
+  .tip-box {
+    display: flex;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .tip-box.info {
+    background: rgba(0,229,255,0.06);
+    border: 1px solid rgba(0,229,255,0.15);
+    color: #9ecfdf;
+  }
+
+  .tip-box.warn {
+    background: rgba(247,201,72,0.06);
+    border: 1px solid rgba(247,201,72,0.15);
+    color: #d4ae60;
+  }
+
+  .tip-box.success {
+    background: rgba(57,255,110,0.05);
+    border: 1px solid rgba(57,255,110,0.15);
+    color: #82c98e;
+  }
+
+  .tip-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Dependencies */
+  .deps-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .dep-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .dep-pill:hover { border-color: rgba(0,229,255,0.3); }
+
+  .dep-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    display: block;
+    font-weight: 600;
+  }
+
+  .dep-role {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* Output table */
+  .output-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .output-table th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .output-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid rgba(30,48,80,0.5);
+    vertical-align: middle;
+  }
+
+  .output-table tr:last-child td { border-bottom: none; }
+
+  .output-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .file-badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(57,255,110,0.07);
+    border: 1px solid rgba(57,255,110,0.15);
+    border-radius: 5px;
+    padding: 3px 8px;
+    display: inline-block;
+  }
+
+  /* Concept section */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  .concept-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .concept-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .concept-body {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 30px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .footer-brand {
+    font-family: var(--mono);
+    color: var(--text-muted);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero, .container, footer { padding-left: 24px; padding-right: 24px; }
+    .pipeline-grid { grid-template-columns: 1fr 1fr; }
+    .deps-grid { grid-template-columns: repeat(3, 1fr); }
+    .concept-grid { grid-template-columns: 1fr; }
+    .stats-row { flex-direction: column; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="dna-bar"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Bioinformatics · BCFtools · BWA-MEM</div>
+  <h1>SNP & Variant<br>Calling <em>Pipeline</em></h1>
+  <p class="hero-subtitle">
+    A complete, step-by-step tutorial for detecting single nucleotide polymorphisms (SNPs) from raw sequencing reads — from FASTQ to filtered VCF.
+  </p>
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-value">9</span>
+      <span class="stat-label">Pipeline Steps</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">5</span>
+      <span class="stat-label">Dependencies</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">QUAL≥30</span>
+      <span class="stat-label">SNP Quality Threshold</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">DP≥10</span>
+      <span class="stat-label">Min. Read Depth</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- CONCEPTS -->
+  <div class="section-header">
+    <h2>What are SNPs?</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="concept-title">🧬 Single Nucleotide Polymorphism</div>
+      <div class="concept-body">A <strong style="color:var(--text)">SNP</strong> is a variation at a single position in a DNA sequence among individuals of the same species. For example, where most genomes have an <code style="color:var(--accent);font-family:var(--mono)">A</code>, a variant individual might carry a <code style="color:var(--accent3);font-family:var(--mono)">T</code>. SNPs are the most common type of genetic variation.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">🔬 Variant Calling</div>
+      <div class="concept-body">Variant calling is the process of identifying positions where the sequenced sample differs from a reference genome. BCFtools uses a <strong style="color:var(--text)">Bayesian statistical model</strong> to call confident variants based on base qualities, read depth, and mapping quality.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">📊 VCF Format</div>
+      <div class="concept-body">The <strong style="color:var(--text)">Variant Call Format (VCF)</strong> is the standard output for variant data. It encodes chromosome position, reference allele, alternate allele, quality score (<code style="color:var(--accent4);font-family:var(--mono)">QUAL</code>), and INFO/FORMAT fields per variant.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">🔁 Read Alignment</div>
+      <div class="concept-body"><strong style="color:var(--text)">BWA-MEM</strong> aligns short reads to the reference by finding maximum exact matches (MEMs), then extending them. For paired-end reads, both mates are aligned together, improving accuracy and allowing proper pair flagging.</div>
+    </div>
+  </div>
+
+  <!-- DEPENDENCIES -->
+  <div class="section-header">
+    <h2>Dependencies & Setup</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="deps-grid">
+    <div class="dep-pill"><span class="dep-name">sra-tools</span><div class="dep-role">Download reads from NCBI SRA</div></div>
+    <div class="dep-pill"><span class="dep-name">bwa</span><div class="dep-role">Read alignment to reference</div></div>
+    <div class="dep-pill"><span class="dep-name">samtools</span><div class="dep-role">BAM manipulation & indexing</div></div>
+    <div class="dep-pill"><span class="dep-name">bcftools</span><div class="dep-role">Variant calling & filtering</div></div>
+    <div class="dep-pill"><span class="dep-name">tabix</span><div class="dep-role">VCF.gz indexing</div></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — conda setup</span></div>
+    <div class="code-body"><pre><span class="comment"># Install all dependencies via conda</span>
+<span class="cmd">conda</span> <span class="kw">create</span> <span class="flag">-n</span> bioset1 <span class="flag">-c</span> bioconda sra-tools bwa samtools bcftools tabix
+<span class="cmd">conda</span> <span class="kw">activate</span> bioset1</pre></div>
+  </div>
+
+  <!-- PIPELINE OVERVIEW -->
+  <div class="section-header">
+    <h2>Pipeline Overview</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="pipeline-grid">
+    <div class="pipeline-card" style="--card-accent: #00e5ff">
+      <div class="card-step">Step 0</div>
+      <div class="card-title">Download Input Data</div>
+      <div class="card-desc">Fetch reference genome (FASTA) and paired-end reads from NCBI SRA.</div>
+      <span class="card-tool">wget · prefetch · fasterq-dump</span>
+    </div>
+    <div class="pipeline-card" style="--card-accent: #39ff6e">
+      <div class="card-step">Steps 1</div>
+      <div class="card-title">Index Reference</div>
+      <div class="card-desc">Build BWA and samtools indexes on the reference FASTA for fast alignment lookup.</div>
+      <span class="card-tool">bwa index · samtools faidx</span>
+    </div>
+    <div class="pipeline-card" style="--card-accent: #a78bfa">
+      <div class="card-step">Step 2</div>
+      <div class="card-title">Align Reads</div>
+      <div class="card-desc">Map paired-end FASTQ reads to the reference using BWA-MEM with read group tags.</div>
+      <span class="card-tool">bwa mem</span>
+    </div>
+    <div class="pipeline-card" style="--card-accent: #ffab70">
+      <div class="card-step">Steps 3–5</div>
+      <div class="card-title">Process Alignments</div>
+      <div class="card-desc">Convert to BAM, sort by query name, fix mate info, re-sort by position.</div>
+      <span class="card-tool">samtools view · sort · fixmate</span>
+    </div>
+    <div class="pipeline-card" style="--card-accent: #ff6b6b">
+      <div class="card-step">Step 6</div>
+      <div class="card-title">Mark Duplicates</div>
+      <div class="card-desc">Flag PCR duplicates introduced during library preparation to prevent false variant calls.</div>
+      <span class="card-tool">samtools markdup</span>
+    </div>
+    <div class="pipeline-card" style="--card-accent: #f7c948">
+      <div class="card-step">Steps 7–9</div>
+      <div class="card-title">Call & Filter SNPs</div>
+      <div class="card-desc">Pileup reads, call variants, extract SNPs, apply quality and depth filters.</div>
+      <span class="card-tool">bcftools mpileup · call · filter</span>
+    </div>
+  </div>
+
+  <!-- STEP 0 -->
+  <div class="section-header">
+    <h2>Step-by-Step Commands</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(0,229,255,0.1);color:var(--accent);border:1px solid rgba(0,229,255,0.3)">0</div>
+      <div class="step-info">
+        <h3>Download Input Data</h3>
+        <p>Reference genome (SARS-CoV-2) + paired-end reads from NCBI SRA</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>We use the <strong>SARS-CoV-2 reference genome</strong> (GCF_009858895.2 / ASM985889v3) as our reference, and paired-end Illumina reads from accession <strong>SRR37561623</strong> from NCBI's Sequence Read Archive.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — download reference genome</span></div>
+        <div class="code-body"><pre><span class="comment"># Download compressed reference FASTA</span>
+<span class="cmd">wget</span> https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/858/895/<span class="path">GCF_009858895.2_ASM985889v3</span>/GCF_009858895.2_ASM985889v3_genomic.fna.gz
+
+<span class="comment"># Decompress</span>
+<span class="cmd">gunzip</span> GCF_009858895.2_ASM985889v3/GCF_009858895.2_ASM985889v3_genomic.fna.gz
+
+<span class="comment"># Rename for convenience</span>
+<span class="cmd">mv</span> GCF_009858895.2_ASM985889v3/GCF_009858895.2_ASM985889v3_genomic.fna <span class="path">ref.fa</span></pre></div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — download paired-end reads from SRA</span></div>
+        <div class="code-body"><pre><span class="comment"># Download SRA archive</span>
+<span class="cmd">prefetch</span> SRR37561623
+
+<span class="comment"># Split into paired-end FASTQ files</span>
+<span class="cmd">fasterq-dump</span> <span class="flag">--split-files</span> SRR37561623/SRR37561623.sra
+<span class="comment"># Output: SRR37561623_1.fastq (R1) and SRR37561623_2.fastq (R2)</span></pre></div>
+      </div>
+
+      <div class="tip-box info">
+        <span class="tip-icon">ℹ️</span>
+        <div><strong>Paired-end reads:</strong> <code style="font-family:var(--mono);color:var(--accent)">_1.fastq</code> contains the forward reads (R1) and <code style="font-family:var(--mono);color:var(--accent)">_2.fastq</code> contains the reverse reads (R2). Both files are required for proper alignment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(57,255,110,0.1);color:var(--accent2);border:1px solid rgba(57,255,110,0.3)">1</div>
+      <div class="step-info">
+        <h3>Index the Reference Genome</h3>
+        <p>Build lookup structures for fast alignment and position queries</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p><strong>BWA indexing</strong> creates suffix array structures (BWT + SA) from the reference, enabling fast seed lookup during alignment. <strong>Samtools faidx</strong> creates a <code style="font-family:var(--mono);color:var(--accent)">.fai</code> index for random-access to chromosomal regions — required for mpileup.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — index reference</span></div>
+        <div class="code-body"><pre><span class="comment"># Create BWA index (generates .amb, .ann, .bwt, .pac, .sa files)</span>
+<span class="cmd">bwa</span> <span class="kw">index</span> <span class="path">ref.fa</span>
+
+<span class="comment"># Create samtools FASTA index (generates ref.fa.fai)</span>
+<span class="cmd">samtools</span> <span class="kw">faidx</span> <span class="path">ref.fa</span></pre></div>
+      </div>
+
+      <div class="tip-box warn">
+        <span class="tip-icon">⚠️</span>
+        <div>Indexing is a one-time cost per reference. For large genomes (human ~3 Gb), <code style="font-family:var(--mono);color:var(--accent4)">bwa index</code> can take 1–2 hours. For SARS-CoV-2 (~30 kb) it completes in seconds.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)">2</div>
+      <div class="step-info">
+        <h3>Align Reads with BWA-MEM</h3>
+        <p>Map paired-end reads to the reference genome, producing a SAM file</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>BWA-MEM finds maximal exact matches between reads and the reference, then chains and extends them using a Smith-Waterman alignment. The <code style="font-family:var(--mono);color:var(--accent)">-R</code> flag embeds a <strong>Read Group (RG) header</strong>, which is mandatory for downstream tools like GATK and recommended for bcftools.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — alignment</span></div>
+        <div class="code-body"><pre><span class="cmd">bwa</span> <span class="kw">mem</span> \
+  <span class="flag">-t</span> 8 \                        <span class="comment"># use 8 CPU threads</span>
+  <span class="flag">-R</span> <span class="path">'@RG\tID:covid\tSM:covid\tPL:illumina'</span> \  <span class="comment"># read group tag</span>
+  <span class="path">ref.fa</span> \                      <span class="comment"># reference genome</span>
+  SRR37561623_1.fastq \         <span class="comment"># forward reads (R1)</span>
+  SRR37561623_2.fastq \         <span class="comment"># reverse reads (R2)</span>
+  > <span class="path">covid.sam</span>                   <span class="comment"># output SAM file</span></pre></div>
+      </div>
+
+      <div class="tip-box info">
+        <span class="tip-icon">💡</span>
+        <div><strong>Read Group fields:</strong> <code style="font-family:var(--mono);color:var(--accent)">ID</code> = unique identifier, <code style="font-family:var(--mono);color:var(--accent)">SM</code> = sample name (used in VCF column headers), <code style="font-family:var(--mono);color:var(--accent)">PL</code> = sequencing platform. These fields propagate into the final VCF for traceability.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(255,171,112,0.1);color:#ffab70;border:1px solid rgba(255,171,112,0.3)">3</div>
+      <div class="step-info">
+        <h3>Convert SAM → BAM and Sort by Query Name</h3>
+        <p>Compress the alignment file and sort reads for fixmate</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>SAM files are plain text and large. Converting to <strong>BAM</strong> (Binary Alignment Map) reduces file size significantly. We then sort by <strong>query name</strong> (read ID) — this groups read pairs together, which is required for <code style="font-family:var(--mono);color:var(--accent)">samtools fixmate</code> to operate correctly.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — SAM to BAM + query sort</span></div>
+        <div class="code-body"><pre><span class="comment"># Convert SAM to BAM (binary, compressed)</span>
+<span class="cmd">samtools</span> <span class="kw">view</span> <span class="flag">-@ 8 -bS</span> <span class="path">covid.sam</span> > <span class="path">covid.bam</span>
+
+<span class="comment"># Sort by query/read name (-n flag)</span>
+<span class="cmd">samtools</span> <span class="kw">sort</span> <span class="flag">-@ 8 -n</span> <span class="flag">-o</span> <span class="path">covid.querysort.bam</span> <span class="path">covid.bam</span></pre></div>
+      </div>
+
+      <div class="tip-box warn">
+        <span class="tip-icon">⚠️</span>
+        <div>The <code style="font-family:var(--mono);color:var(--accent4)">-n</code> (name sort) flag is essential here. Fixmate requires paired reads to be adjacent in the file. Sorting by coordinate at this stage would break fixmate.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(255,171,112,0.1);color:#ffab70;border:1px solid rgba(255,171,112,0.3)">4</div>
+      <div class="step-info">
+        <h3>Fix Mate Information</h3>
+        <p>Populate mate CIGAR and insert size fields in paired-end alignments</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p><code style="font-family:var(--mono);color:var(--accent)">samtools fixmate</code> fills in the <strong>mate coordinate</strong>, <strong>mate CIGAR</strong> (<code style="font-family:var(--mono)">MC</code> tag), and corrects <strong>FLAG bits</strong> that describe the paired relationship. The <code style="font-family:var(--mono);color:var(--accent)">-m</code> flag adds the mate score tag, required by <code style="font-family:var(--mono)">markdup</code>.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — fixmate</span></div>
+        <div class="code-body"><pre><span class="comment"># Fix mate pair information; -m adds mate score tag</span>
+<span class="cmd">samtools</span> <span class="kw">fixmate</span> <span class="flag">-@ 8 -m</span> <span class="path">covid.querysort.bam</span> <span class="path">covid.fixmate.bam</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(255,171,112,0.1);color:#ffab70;border:1px solid rgba(255,171,112,0.3)">5</div>
+      <div class="step-info">
+        <h3>Re-sort by Genomic Position</h3>
+        <p>Coordinate-sort the BAM for variant calling and IGV visualization</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>After fixmate, we re-sort the BAM by <strong>chromosomal coordinate</strong>. All downstream tools — bcftools mpileup, IGV, GATK — require coordinate-sorted input. This is the "final" alignment sort order.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — coordinate sort</span></div>
+        <div class="code-body"><pre><span class="comment"># Sort by genomic coordinate (default sort order)</span>
+<span class="cmd">samtools</span> <span class="kw">sort</span> <span class="flag">-@ 8</span> <span class="flag">-o</span> <span class="path">covid.positionsort.bam</span> <span class="path">covid.fixmate.bam</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(255,107,107,0.1);color:var(--accent3);border:1px solid rgba(255,107,107,0.3)">6</div>
+      <div class="step-info">
+        <h3>Mark PCR Duplicates</h3>
+        <p>Identify and flag reads arising from PCR amplification rather than unique molecules</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>During library preparation, PCR amplification creates <strong>duplicate molecules</strong> from the same original DNA fragment. These duplicates cause artificially inflated read depth and can introduce false variant calls. <code style="font-family:var(--mono);color:var(--accent)">samtools markdup</code> flags these reads without removing them, so they can be ignored by downstream callers.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — mark duplicates + index</span></div>
+        <div class="code-body"><pre><span class="comment"># Mark optical and PCR duplicates</span>
+<span class="cmd">samtools</span> <span class="kw">markdup</span> <span class="flag">-@ 8</span> <span class="path">covid.positionsort.bam</span> <span class="path">covid.markdup.bam</span>
+
+<span class="comment"># Index the final BAM (creates .bai file)</span>
+<span class="cmd">samtools</span> <span class="kw">index</span> <span class="path">covid.markdup.bam</span></pre></div>
+      </div>
+
+      <div class="tip-box success">
+        <span class="tip-icon">✅</span>
+        <div><code style="font-family:var(--mono);color:var(--accent2)">covid.markdup.bam</code> is your <strong>final processed alignment</strong>. You can now load it into <strong>IGV</strong> or <strong>Tablet</strong> to visually inspect read pileups over the genome.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(247,201,72,0.1);color:var(--accent4);border:1px solid rgba(247,201,72,0.3)">7</div>
+      <div class="step-info">
+        <h3>Variant Calling with BCFtools</h3>
+        <p>Pileup reads across the genome and call variants using a Bayesian model</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p><strong>bcftools mpileup</strong> summarizes base calls at each genomic position. It pipes directly into <strong>bcftools call</strong>, which applies a Bayesian genotype likelihood model to identify positions where the data supports a variant. The <code style="font-family:var(--mono);color:var(--accent)">-mv</code> flags select only variant sites using the multiallelic caller.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — pileup → variant call</span></div>
+        <div class="code-body"><pre><span class="cmd">bcftools</span> <span class="kw">mpileup</span> \
+  <span class="flag">--threads</span> 8 \               <span class="comment"># parallelise</span>
+  <span class="flag">-Ou</span> \                       <span class="comment"># output uncompressed BCF (pipe-friendly)</span>
+  <span class="flag">-f</span> <span class="path">ref.fa</span> \                 <span class="comment"># reference FASTA</span>
+  <span class="path">covid.markdup.bam</span> \
+<span class="pipe-sym">|</span> <span class="cmd">bcftools</span> <span class="kw">call</span> \
+  <span class="flag">--threads</span> 8 \
+  <span class="flag">-m</span> \                        <span class="comment"># multiallelic caller</span>
+  <span class="flag">-v</span> \                        <span class="comment"># output variant sites only</span>
+  <span class="flag">-Oz</span> \                       <span class="comment"># output compressed VCF (.vcf.gz)</span>
+  <span class="flag">-o</span> <span class="path">covid.vcf.gz</span>
+
+<span class="comment"># Index the VCF</span>
+<span class="cmd">bcftools</span> <span class="kw">index</span> <span class="path">covid.vcf.gz</span></pre></div>
+      </div>
+
+      <div class="tip-box info">
+        <span class="tip-icon">💡</span>
+        <div>The <code style="font-family:var(--mono);color:var(--accent)">-Ou</code> flag passes uncompressed BCF between mpileup and call via a Unix pipe, avoiding disk I/O. This is faster than writing an intermediate file. <code style="font-family:var(--mono);color:var(--accent)">-Oz</code> then outputs bgzip-compressed VCF for the final file.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(247,201,72,0.1);color:var(--accent4);border:1px solid rgba(247,201,72,0.3)">8</div>
+      <div class="step-info">
+        <h3>Extract SNPs Only</h3>
+        <p>Isolate single nucleotide variants from all variant types</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>The raw VCF contains all variant types: SNPs, indels (insertions/deletions), MNPs, etc. We use <code style="font-family:var(--mono);color:var(--accent)">bcftools view -v snps</code> to retain only <strong>single nucleotide polymorphisms</strong> for focused downstream analysis.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — extract SNPs</span></div>
+        <div class="code-body"><pre><span class="comment"># Keep only SNP-type variants</span>
+<span class="cmd">bcftools</span> <span class="kw">view</span> <span class="flag">-v snps</span> <span class="path">covid.vcf.gz</span> <span class="flag">-Oz</span> <span class="flag">-o</span> <span class="path">covid.snps.vcf.gz</span>
+
+<span class="comment"># Index the SNP VCF</span>
+<span class="cmd">bcftools</span> <span class="kw">index</span> <span class="path">covid.snps.vcf.gz</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 9 -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-num" style="background:rgba(247,201,72,0.1);color:var(--accent4);border:1px solid rgba(247,201,72,0.3)">9</div>
+      <div class="step-info">
+        <h3>Filter High-Quality SNPs</h3>
+        <p>Remove low-confidence variants using QUAL and depth thresholds</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>Not all called SNPs are real. Low-quality or low-depth variants are often sequencing errors or alignment artefacts. We apply two filters:</p>
+      <p>• <strong>QUAL &lt; 30</strong> — Phred-scaled genotype quality. QUAL=30 means 1-in-1000 probability the call is wrong.<br>
+      • <strong>DP &lt; 10</strong> — Minimum read depth. Calls supported by fewer than 10 reads are unreliable.</p>
+
+      <div class="code-block">
+        <div class="code-top"><div class="code-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div><span class="code-label">bash — filter SNPs</span></div>
+        <div class="code-body"><pre><span class="comment"># Exclude variants where QUAL < 30 OR read depth < 10</span>
+<span class="cmd">bcftools</span> <span class="kw">filter</span> \
+  <span class="flag">-e</span> <span class="path">'QUAL&lt;30 || DP&lt;10'</span> \     <span class="comment"># expression: EXCLUDE if true</span>
+  <span class="path">covid.snps.vcf.gz</span> \
+  <span class="flag">-Oz</span> <span class="flag">-o</span> <span class="path">covid.filtered.vcf.gz</span>
+
+<span class="comment"># Index the final filtered VCF</span>
+<span class="cmd">bcftools</span> <span class="kw">index</span> <span class="path">covid.filtered.vcf.gz</span></pre></div>
+      </div>
+
+      <div class="tip-box success">
+        <span class="tip-icon">✅</span>
+        <div><code style="font-family:var(--mono);color:var(--accent2)">covid.filtered.vcf.gz</code> is your <strong>final high-confidence SNP set</strong>. You can inspect it with <code style="font-family:var(--mono)">bcftools stats</code>, annotate with <code style="font-family:var(--mono)">snpEff</code>, or visualize variant frequencies.</div>
+      </div>
+
+      <div class="tip-box info">
+        <span class="tip-icon">💡</span>
+        <div>To quickly view your filtered SNPs: <code style="font-family:var(--mono);color:var(--accent)">bcftools view covid.filtered.vcf.gz | grep -v "^#"</code>. Use <code style="font-family:var(--mono);color:var(--accent)">bcftools stats covid.filtered.vcf.gz</code> for a full summary report.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTPUT FILES -->
+  <div class="section-header">
+    <h2>Output Files Summary</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-body" style="padding:0">
+      <table class="output-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Format</th>
+            <th>Description</th>
+            <th>Next Step</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="file-badge">covid.markdup.bam</span></td>
+            <td style="color:var(--text-muted);font-size:13px">BAM</td>
+            <td style="color:var(--text-muted);font-size:13px">Final processed alignment with marked duplicates</td>
+            <td style="color:var(--text-muted);font-size:13px">Visualize in IGV / feed to mpileup</td>
+          </tr>
+          <tr>
+            <td><span class="file-badge">covid.vcf.gz</span></td>
+            <td style="color:var(--text-muted);font-size:13px">VCF.gz</td>
+            <td style="color:var(--text-muted);font-size:13px">Raw called variants — all types (SNPs + indels)</td>
+            <td style="color:var(--text-muted);font-size:13px">Extract SNP subset</td>
+          </tr>
+          <tr>
+            <td><span class="file-badge">covid.snps.vcf.gz</span></td>
+            <td style="color:var(--text-muted);font-size:13px">VCF.gz</td>
+            <td style="color:var(--text-muted);font-size:13px">SNP-only variants, unfiltered</td>
+            <td style="color:var(--text-muted);font-size:13px">Apply quality filters</td>
+          </tr>
+          <tr>
+            <td><span class="file-badge">covid.filtered.vcf.gz</span></td>
+            <td style="color:var(--text-muted);font-size:13px">VCF.gz</td>
+            <td style="color:var(--text-muted);font-size:13px">High-confidence SNPs (QUAL≥30, DP≥10)</td>
+            <td style="color:var(--text-muted);font-size:13px">Annotate / compare / report</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div class="section-header">
+    <h2>What's Next?</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="concept-title">📊 Variant Annotation</div>
+      <div class="concept-body">Use <strong style="color:var(--text)">snpEff</strong> or <strong style="color:var(--text)">snpSift</strong> to annotate variants with gene names, functional impact (synonymous / missense / stop-gain), and population frequency from databases like ClinVar or dbSNP.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">🔍 Quality Control</div>
+      <div class="concept-body">Run <strong style="color:var(--text)">FastQC</strong> on raw reads before alignment, and <strong style="color:var(--text)">MultiQC</strong> to aggregate QC across all samples. Check alignment rates with <code style="color:var(--accent);font-family:var(--mono)">samtools flagstat covid.markdup.bam</code>.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">🧫 Multiple Samples</div>
+      <div class="concept-body">For multi-sample variant calling, align each sample separately, then call jointly: <code style="color:var(--accent);font-family:var(--mono)">bcftools mpileup -f ref.fa sample1.bam sample2.bam</code>. Joint calling improves genotype accuracy across samples.</div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-title">🗺️ Phylogenetics</div>
+      <div class="concept-body">For SARS-CoV-2, compare your filtered SNPs against the <strong style="color:var(--text)">Nextstrain / Pango lineage</strong> databases to assign a viral clade. Tools like <strong style="color:var(--text)">Pangolin</strong> and <strong style="color:var(--text)">Nextclade</strong> accept VCF input.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="footer-brand">🧬 SNP Calling Pipeline · BCFtools + BWA-MEM</span>
+  <span>SARS-CoV-2 · GCF_009858895.2 · SRR37561623</span>
+</footer>
+
+</body>
+</html>
