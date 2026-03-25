@@ -34,6 +34,8 @@ prokka --version
 
 **Simple command:**
 ```bash
+wget https://raw.githubusercontent.com/mukulverma22/ICMR_genome_assembly-/refs/heads/main/day2-genome-assembly/contigs.fasta
+mv contigs.fasta assembly.fasta
 prokka assembly.fasta --outdir results/
 ```
 
