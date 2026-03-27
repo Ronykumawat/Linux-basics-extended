@@ -377,6 +377,7 @@ Save the script below as `~/amr_analysis/compare_results.py` and run it with:
 
 ```bash
 cd ~/amr_analysis
+conda install -c conda-forge pandas matplotlib seaborn
 python compare_results.py
 ```
 
